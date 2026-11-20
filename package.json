@@ -1,0 +1,27 @@
+{
+  "name": "snowglobe-park",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A 3D Christmas snow globe with a miniature theme park inside: weather, day/night, stepless zoom and tilt-shift photos. Built with three.js.",
+  "license": "MIT",
+  "homepage": "https://leoli-dev.github.io/snowglobe-park/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leoli-dev/snowglobe-park.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --dev",
+    "serve": "node tools/serve.mjs",
+    "shot": "node tools/shot.mjs",
+    "media": "node tools/media.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright-core": "1.65.1"
+  }
+}

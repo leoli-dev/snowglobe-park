@@ -1,0 +1,143 @@
+<canvas id="scene" aria-label="3D 圣诞雪景球"></canvas>
+
+<div id="loading">
+  <div class="load-inner">
+    <svg class="load-globe" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="28" r="20" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 48h36l-3 8H17z" fill="currentColor" opacity=".55"/><path d="M22 34l4-6 3 4 3-8 4 6 3-3 4 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <div class="load-title">雪境乐园</div>
+    <div class="load-sub">Snow Globe Kingdom</div>
+    <div class="load-track"><div id="loadbar"></div></div>
+    <div id="loadlabel">正在把乐园装进玻璃球…</div>
+  </div>
+</div>
+
+<div id="ui" hidden>
+  <header class="brand">
+    <div class="brand-title">雪境乐园</div>
+    <div class="brand-sub">Snow Globe Kingdom · <span id="brandClock">16:48</span></div>
+  </header>
+
+  <div class="hint" id="hint">拖拽旋转 · 滚轮或双指无级缩放 · 右键/Shift 拖拽平移 · 双击飞到该处</div>
+
+  <!-- zoom rail -->
+  <div class="rail" id="rail">
+    <button class="rbtn" id="zoomIn" title="放大" aria-label="放大"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="zoom-wrap"><input type="range" id="zoom" min="0" max="1000" value="80" aria-label="缩放"></div>
+    <button class="rbtn" id="zoomOut" title="缩小" aria-label="缩小"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+    <div class="rail-sep"></div>
+    <button class="rbtn" id="home" title="回到全景" aria-label="回到全景"><svg viewBox="0 0 24 24"><circle cx="12" cy="10.5" r="6.5"/><path d="M6.5 19h11M8 21.5h8"/></svg></button>
+    <button class="rbtn" id="guideBtn" title="景点与人物图鉴" aria-label="景点与人物图鉴"><svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z"/><path d="M12 5.5V19"/></svg></button>
+    <button class="rbtn" id="labelsBtn" title="显示名称标签" aria-label="显示名称标签" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M3.5 12.5l8-8h8v8l-8 8z"/><circle cx="15.5" cy="8.5" r="1.4"/></svg></button>
+  </div>
+
+  <!-- guide drawer -->
+  <aside class="guide" id="guide" hidden>
+    <div class="guide-head">
+      <div class="guide-title">乐园图鉴</div>
+      <button class="xbtn" id="guideClose" aria-label="关闭图鉴"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" class="tab on" data-tab="attraction" id="tabA">景点 <span id="countA"></span></button>
+      <button role="tab" class="tab" data-tab="character" id="tabC">人物 <span id="countC"></span></button>
+    </div>
+    <input id="guideSearch" class="search" type="search" placeholder="搜索：太空山、玲娜贝儿…" autocomplete="off">
+    <div class="guide-list" id="guideList"></div>
+    <div class="guide-foot">粉丝致敬作品，所有模型均为程序化原创几何，与迪士尼公司无关。</div>
+  </aside>
+
+  <!-- main dock -->
+  <section class="dock" id="dock">
+    <div class="dock-row">
+      <div class="cell time-cell">
+        <div class="time-head">
+          <span class="sunmoon" id="sunmoon" aria-hidden="true"></span>
+          <span class="time-big" id="timeBig">16:48</span>
+          <span class="time-phase" id="timePhase">黄昏</span>
+          <button class="ibtn" id="playBtn" title="暂停时间流逝" aria-label="暂停时间流逝"><svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14M16 5v14"/></svg></button>
+          <select id="speed" aria-label="时间流速" class="speed">
+            <option value="60">1 小时 / 60 秒</option>
+            <option value="25" selected>1 小时 / 25 秒</option>
+            <option value="8">1 小时 / 8 秒</option>
+          </select>
+        </div>
+        <input type="range" id="hour" class="hour" min="0" max="1440" step="1" value="1008" aria-label="一天中的时间">
+        <div class="hour-ticks" aria-hidden="true"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>
+      </div>
+
+      <div class="cell weather-cell">
+        <div class="cell-label">天气</div>
+        <div class="wx" id="wx">
+          <button data-w="clear" title="晴"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span>晴</span></button>
+          <button data-w="cloudy" title="多云"><svg viewBox="0 0 24 24"><path d="M7 18.5h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 11a3.75 3.75 0 0 0 0 7.5z"/></svg><span>多云</span></button>
+          <button data-w="snow" title="小雪"><svg viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5L12 6.5l2.5-2M9.5 19.5L12 17.5l2.5 2"/></svg><span>小雪</span></button>
+          <button data-w="blizzard" title="暴风雪"><svg viewBox="0 0 24 24"><path d="M3 8h11a2.5 2.5 0 1 0-2.5-2.5M3 12h15a2.5 2.5 0 1 1-2.5 2.5M3 16h8"/><circle cx="17" cy="19.5" r=".6"/><circle cx="20" cy="9" r=".6"/><circle cx="7" cy="20" r=".6"/></svg><span>暴风雪</span></button>
+          <button data-w="rain" title="雨"><svg viewBox="0 0 24 24"><path d="M7 14.5h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 7a3.75 3.75 0 0 0 0 7.5zM8 17.5l-1 3M12 17.5l-1 3M16 17.5l-1 3"/></svg><span>雨</span></button>
+          <button data-w="storm" title="雷雨"><svg viewBox="0 0 24 24"><path d="M7 14.5h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 7a3.75 3.75 0 0 0 0 7.5zM12.5 14l-2.5 4h3l-2 4"/></svg><span>雷雨</span></button>
+          <button data-w="fog" title="雾"><svg viewBox="0 0 24 24"><path d="M4 9h16M3 13h18M5 17h14M7 5h10"/></svg><span>雾</span></button>
+          <button data-w="aurora" title="极光夜"><svg viewBox="0 0 24 24"><path d="M3 16c3-6 5-9 9-9s6 3 9 9"/><path d="M5 19c2.5-4 4.5-6 7-6s4.5 2 7 6" opacity=".6"/><circle cx="18" cy="5" r=".7"/><circle cx="6" cy="6" r=".7"/></svg><span>极光</span></button>
+        </div>
+        <div class="snowline">
+          <label for="snowAmt">积雪</label>
+          <input type="range" id="snowAmt" min="0" max="100" value="55">
+          <span id="snowVal" class="num">55%</span>
+          <label class="chk"><input type="checkbox" id="autoAccum" checked><span>随天气积/化</span></label>
+        </div>
+      </div>
+
+      <div class="cell act-cell">
+        <div class="cell-label">玩法</div>
+        <div class="acts">
+          <button class="act" id="shakeBtn" title="摇一摇雪景球"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6"/><path d="M8 19.5h8M2.5 7.5c-.8 1.6-.8 3.4 0 5M21.5 7.5c.8 1.6.8 3.4 0 5"/><circle cx="10" cy="9" r=".6"/><circle cx="13.5" cy="11.5" r=".6"/><circle cx="12.5" cy="7.5" r=".6"/></svg><span>摇一摇</span></button>
+          <button class="act" id="fireBtn" title="燃放烟花"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg><span>烟花</span></button>
+          <button class="act" id="paradeBtn" title="开始圣诞巡游"><svg viewBox="0 0 24 24"><path d="M5 21V4M5 4.5c4-2 6 2 10 0v8c-4 2-6-2-10 0"/></svg><span>巡游</span></button>
+          <button class="act" id="musicBtn" title="音乐盒" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l10-2v12"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span>音乐盒</span></button>
+        </div>
+      </div>
+
+      <div class="cell mini-cell">
+        <button class="mini-btn" id="miniBtn" aria-pressed="false">
+          <svg viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6H8l1.5-2h5L16 6h2.5A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.8"/></svg>
+          <span><b>缩微摄影</b><small>移轴 · 拍照</small></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <button class="dock-toggle" id="dockToggle" aria-expanded="true" aria-controls="dock"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg><span class="dt-label">控制面板</span></button>
+
+  <!-- miniature photo mode -->
+  <div class="mini" id="mini" hidden>
+    <div class="vf" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><i class="g g1"></i><i class="g g2"></i><i class="g g3"></i><i class="g g4"></i></div>
+    <div class="band" id="band" aria-hidden="true"><div class="band-line"></div><div class="band-line"></div><div class="band-handle" id="bandHandle" title="拖动调整对焦位置"></div></div>
+    <div class="mini-panel">
+      <div class="mini-title">缩微摄影 <small>Tilt-shift</small></div>
+      <label>对焦位置 <input type="range" id="tFocus" min="15" max="85" value="52"></label>
+      <label>景深范围 <input type="range" id="tBand" min="2" max="45" value="14"></label>
+      <label>模糊强度 <input type="range" id="tBlur" min="0" max="36" value="16"></label>
+      <label>色彩饱和 <input type="range" id="tSat" min="80" max="180" value="132"></label>
+      <label>玩具速度 <input type="range" id="tSpeed" min="1" max="4" step="0.5" value="2"></label>
+      <label class="chk"><input type="checkbox" id="tStamp" checked><span>日期印</span></label>
+      <label class="chk"><input type="checkbox" id="tTimer"><span>3 秒自拍</span></label>
+    </div>
+    <div class="shutter-row">
+      <button class="exit" id="miniExit">退出</button>
+      <button class="shutter" id="shutter" aria-label="拍照"><span></span></button>
+      <div class="gallery" id="gallery" aria-label="已拍照片"></div>
+    </div>
+    <div class="countdown" id="countdown" hidden></div>
+  </div>
+
+  <div class="flash" id="flash"></div>
+  <div class="lightbox" id="lightbox" hidden>
+    <div class="lb-inner">
+      <div class="lb-img" id="lbImgWrap"></div>
+      <div class="lb-actions">
+        <button id="lbSave" class="primary">保存照片</button>
+        <button id="lbClose">关闭</button>
+      </div>
+      <div class="lb-note" id="lbNote"></div>
+    </div>
+  </div>
+
+  <div class="labels" id="labels" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
